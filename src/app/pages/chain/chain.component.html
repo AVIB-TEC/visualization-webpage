@@ -1,0 +1,56 @@
+<div class="container">
+	<mat-toolbar color="primary">
+	  <span>AVIB</span>
+	</mat-toolbar>
+
+	<mat-drawer-container class="example-container" [hasBackdrop]="false" >
+	  <mat-drawer #drawer mode="push" class="drawer" [opened]="true">
+	  	<h1>Search for a Method</h1>
+  		<form [formGroup]="searchForm" (ngSubmit)="onSubmit()" class="form-conatiner">
+		  	<mat-form-field appearance="fill">
+	  	    <mat-label>Method fullqualified name</mat-label>
+	  	    <input matInput formControlName="qualifiedName">
+	  	  </mat-form-field>
+	  	  <mat-form-field appearance="fill">
+				  <mat-label>Metric for color</mat-label>
+				  <mat-select formControlName="metric1">
+				    <mat-option value="1">icrlmin</mat-option>
+				    <mat-option value="2">icrlmax</mat-option>
+				    <mat-option value="3">icrlavg</mat-option>
+				    <mat-option value="4">icrlsum</mat-option>
+				  </mat-select>
+				  <mat-hint align="end">Choose the first metric</mat-hint>
+				</mat-form-field>
+				<mat-form-field appearance="fill">
+				  <mat-label>Metric for size</mat-label>
+				  <mat-select formControlName="metric2">
+				    <mat-option value="1">icrlmin</mat-option>
+				    <mat-option value="2">icrlmax</mat-option>
+				    <mat-option value="3">icrlavg</mat-option>
+				    <mat-option value="4">icrlsum</mat-option>
+				  </mat-select>
+				  <mat-hint align="end">Choose the second metric</mat-hint>
+				</mat-form-field>
+				<br>
+				<button mat-raised-button  type="submit" [disabled]="!searchForm.valid" color="primary">Search</button>
+			</form>
+			<div class="team-container">
+				<h1>Team Management</h1>
+				<button mat-raised-button color="primary"(click)="onCreateTeam()">Create Team</button>
+				<button mat-raised-button color="accent" (click)="onJoinTeam()">Join Team</button>
+			</div>
+
+
+			
+	  </mat-drawer>
+	  <mat-drawer-content>
+	  	<div class="container">
+				<svg id="svg"></svg>
+		    <button mat-fab color="primary" class="btn-edit" (click)="drawer.toggle()">
+          <mat-icon iconName="edit" >edit</mat-icon>
+        </button>
+		  </div>
+	  </mat-drawer-content>
+	</mat-drawer-container>
+</div>
+
