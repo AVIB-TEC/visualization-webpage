@@ -53,7 +53,7 @@ export class ChainComponent implements OnInit {
 
   ngOnInit(): void {
     this.searchForm.setValue({
-      qualifiedName:'Neo4j.Driver.Internal.ConnectionPool.Release',
+      qualifiedName:'org.neo4j.driver.GraphDatabase.driver(URI,Config)',
       metric1:"1",
       metric2:"2"
     });
@@ -80,7 +80,7 @@ export class ChainComponent implements OnInit {
   				console.log("Connected succesfully");
   			}
   		});
-    this.getData('Neo4j.Driver.Internal.ConnectionPool.Release',1,2);
+    this.getData('org.neo4j.driver.GraphDatabase.driver(URI,Config)',1,2);
   }
 
   render(graph){
@@ -215,8 +215,7 @@ export class ChainComponent implements OnInit {
   }
 
   async getData(method, metricType1,metricType2){
-
-    await this.neo4jService.run('MATCH (m:Metodo {name:'+"'"+method+"'"+'})-[r:CALLS *]->(b) RETURN m,r,b')
+    await this.neo4jService.run('MATCH (m:Method {name:'+"'"+method+"'"+'})-[r:CALLS *]->(b) RETURN m,r,b')
     .then((result)=>{
       let mainMethod=null;
       let methodsList=[];
@@ -268,6 +267,13 @@ export class ChainComponent implements OnInit {
         if(max2<metric2){
           max2 = metric2
         }
+        console.log({
+           "name":result[i].method.name,
+           "id":result[i].method.id,
+           "label":"Method",
+           "firstMetric": metric,
+           "secondMetric": metric2,
+          })
         this.data.nodes.push(
           {
            "name":result[i].method.name,
@@ -319,16 +325,16 @@ export class ChainComponent implements OnInit {
   getMetric(type,method){
     let metric=0;
     if(type==1){
-      metric=method.icrlmin
+      metric=method.floc
     }
     else if(type==2){
-      metric=method.icrlmax
+      metric=method.rcyc
     }
     else if(type==3){
-      metric=method.icrlavg
+      metric=method.fcyc
     }
     else if(type==4){
-      metric=method.icrlsum
+      metric=method.rloc
     }
     return metric
   }
