@@ -1,4 +1,7 @@
 # visualization-webpage 
+[![Docker Image CI](https://github.com/AVIB-TEC/visualization-webpage/actions/workflows/docker-image.yml/badge.svg)](https://github.com/AVIB-TEC/visualization-webpage/actions/workflows/docker-image.yml) 
+[![Node.js CI](https://github.com/AVIB-TEC/visualization-webpage/actions/workflows/node.js.yml/badge.svg)](https://github.com/AVIB-TEC/visualization-webpage/actions/workflows/node.js.yml)
+
 This repository contains the code for the Angular webpage visualizations. It is configured with CI/CD on the main branch. 
 
 ## Running locally
