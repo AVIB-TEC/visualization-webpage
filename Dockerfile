@@ -25,8 +25,8 @@ FROM nginx:1.16.0-alpine
 # copy artifact build from the 'build environment'
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# expose port 80
-EXPOSE 4200 1617
+# expose port 80 to view page. Port 1617 is used internally
+EXPOSE 80
 
 # run nginx
 CMD ["nginx", "-g", "daemon off;"]
