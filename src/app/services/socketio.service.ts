@@ -12,6 +12,7 @@ export class SocketioService {
   
   setupSocketConnection() {
   	if(this.socket===undefined){
+      console.log(environment.SOCKET_ENDPOINT);
     	this.socket = io(environment.SOCKET_ENDPOINT);
   	}
     console.log("Socket",this.socket);
