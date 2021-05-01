@@ -6,7 +6,7 @@ import { AngularNeo4jService } from 'angular-neo4j';
 })
 export class Neo4jService {
 	
-  url:string='bolt://10.240.0.107:7687';
+  url:string='bolt://avib-graph-neo4j-core-0.avib-graph-neo4j.default.svc.cluster.local:7687';
   username:string= 'neo4j';
   password:string= 'neo4j';
   encrypted:boolean=true;
