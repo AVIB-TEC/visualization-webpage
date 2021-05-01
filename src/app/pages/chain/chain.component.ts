@@ -41,7 +41,7 @@ export class ChainComponent implements OnInit {
   alreadySubscribed=false;
 
   //Neo4j
-  url:string='bolt://localhost:7687';
+  url:string='bolt://avib-graph-neo4j-core-0.avib-graph-neo4j.default.svc.cluster.local:7687';
   username:string= 'neo4j';
   password:string= 'admin';
   encrypted:boolean=false;
