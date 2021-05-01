@@ -79,6 +79,7 @@ export class ChainComponent implements OnInit {
   	this.neo4jService.connect(this.url,this.username,this.password,this.encrypted)
   		.then(driver =>{
   			if(driver){
+          console.log("Neo4j url: ", this.url);
   				console.log("Connected succesfully");
   			}
   		});
