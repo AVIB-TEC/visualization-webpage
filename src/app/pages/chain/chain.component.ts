@@ -49,7 +49,9 @@ export class ChainComponent implements OnInit {
   constructor(
     private neo4jService : AngularNeo4jService,
     private formBuilder: FormBuilder,
-    private socketioService: SocketioService) { }
+    private socketioService: SocketioService) {
+    console.log("Neo4j url: ", this.url);
+  }
 
   ngOnInit(): void {
     this.searchForm.setValue({
