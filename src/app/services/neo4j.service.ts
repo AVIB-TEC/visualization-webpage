@@ -11,7 +11,9 @@ export class Neo4jService {
   password:string= 'neo4j';
   encrypted:boolean=true;
 
-  constructor(private neo4j: AngularNeo4jService) {}
+  constructor(private neo4j: AngularNeo4jService) {
+    console.log(this.url)
+  }
 
   connect(){
     return this.neo4j.connect(this.url,this.username,this.password,this.encrypted);
