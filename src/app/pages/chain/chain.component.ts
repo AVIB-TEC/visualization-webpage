@@ -41,7 +41,7 @@ export class ChainComponent implements OnInit {
   alreadySubscribed=false;
 
   //Neo4j
-  url:string='bolt://avib-graph-neo4j-core-0.avib-graph-neo4j.default.svc.cluster.local:7687';
+  url:string='bolt://localhost:7687';
   username:string= 'neo4j';
   password:string= 'admin';
   encrypted:boolean=false;
@@ -189,7 +189,12 @@ export class ChainComponent implements OnInit {
        })
       .on('mouseover', function (event,d) {
           d3.selectAll('circle')
-            .style("stroke", "black");
+            .style("stroke", (d)=> {
+               let temp:any;
+               temp=d;
+               let temp2 = color(temp.thirdMetric)
+               return temp2;
+            });
           d3.select(this)
             .style("stroke", "green");
           return tooltip
@@ -217,9 +222,14 @@ export class ChainComponent implements OnInit {
   }
 
   async getData(method, metricType1,metricType2){
-    await this.neo4jService.run('MATCH (m:Method {name:'+"'"+method+"'"+'})-[r:CALLS *]->(b) RETURN m,r,b')
-    .then((result)=>{
-      let mainMethod=null;
+    let result = await this.neo4jService.run('MATCH (m:Method {name:'+"'"+method+"'"+'})-[r:CALLS *]->(b) RETURN m,r,b')
+    .catch(error => {
+      this.neo4jService.disconnect();
+      console.log(error)
+      throw error;
+    });
+
+    let mainMethod=null;
       let methodsList=[];
       let cont = 1;
       result.map(res=>{
@@ -233,13 +243,15 @@ export class ChainComponent implements OnInit {
         cont+=1;
       })
       result = methodsList;
-      this.data = {"nodes":[],"links":[], "domain":[], "domain2":[]}
+      this.data = {"nodes":[],"links":[], "domain":[], "domain2":[], "domain3":[]}
 
       //Creates the nodes and the metrics
-      let min= Number.MAX_SAFE_INTEGER;
+      let min = Number.MAX_SAFE_INTEGER;
       let max = Number.MIN_SAFE_INTEGER;
-      let min2= Number.MAX_SAFE_INTEGER;
+      let min2 = Number.MAX_SAFE_INTEGER;
       let max2 = Number.MIN_SAFE_INTEGER;
+      let min3 = Number.MAX_SAFE_INTEGER;
+      let max3 = Number.MIN_SAFE_INTEGER;
 
       cont = 1;
       for (let i = 0; i < result.length; i++) {
@@ -256,6 +268,7 @@ export class ChainComponent implements OnInit {
         //let metric = result[i].method.icrlavg;
         let metric = this.getMetric(metricType1,result[i].method);
         let metric2 = this.getMetric(metricType2,result[i].method);
+        let metric3 = await this.getLogicalCoupling(result[i].method.name);
 
         if(min>metric){
           min = metric
@@ -269,12 +282,19 @@ export class ChainComponent implements OnInit {
         if(max2<metric2){
           max2 = metric2
         }
+        if(min3>metric3){
+          min3 = metric3
+        }
+        if(max3<metric3){
+          max3 = metric3
+        }
         console.log({
            "name":result[i].method.name,
            "id":result[i].method.id,
            "label":"Method",
            "firstMetric": metric,
            "secondMetric": metric2,
+           "thirdMetric": metric3
           })
         this.data.nodes.push(
           {
@@ -283,6 +303,7 @@ export class ChainComponent implements OnInit {
            "label":"Method",
            "firstMetric": metric,
            "secondMetric": metric2,
+           "thirdMetric": metric3
           }
         );
         
@@ -292,9 +313,12 @@ export class ChainComponent implements OnInit {
       this.data.domain.push(max);
       this.data.domain2.push(min2);
       this.data.domain2.push(max2);
+      this.data.domain3.push(min3);
+      this.data.domain3.push(max3);
 
       console.log("Domain 1:",this.data.domain);
       console.log("Domain 2:",this.data.domain2);
+      console.log("Domain 3:",this.data.domain3);
       console.log("Nodes:",this.data.nodes);
 
       //Creates the links for other nodes (Consider making recursive case 1,2,3)
@@ -315,14 +339,60 @@ export class ChainComponent implements OnInit {
         }
       }
       console.log("Links:",this.data.links);
-    })
+    this.render(this.data);
+  }
+
+  async getLogicalCoupling(method){
+    let count= 0
+    let result = await this.neo4jService.run(
+      'match (m:Method { name:"'+method+'"})-[:CALLS]->(o:Method) '+      
+      'return id(m) as id, m.method as method,  collect(id(o)) as rels '+
+      ' union '+
+      'match (m:Method { name:"'+method+'"}) '+
+      'match (m)-[:CALLS]->(n) '+
+      'with n '+
+      'match (n)-[:CALLS]->(o) '+
+      'return id(n) as id, n.method as method, collect(id(o)) as rels '
+    )
     .catch(error => {
       this.neo4jService.disconnect();
       console.log(error)
       throw error;
     });
-    this.render(this.data);
+
+    if(result.length){
+      let processedNodes =[];      
+      for(let item of result){
+        if( item[0] in processedNodes){
+          continue;
+        }
+        else{
+          processedNodes.push(item[0])
+          count += await this.getChangeCount(item[2]); 
+        }
+      }
+    }
+    return count;
   }
+  //Gets how many changes have occured in the class which it belongs to
+  async getChangeCount(idList){
+    let search = `match (m:Method)<-[:OWNS_METHOD]-(c:Class)-[r:CO_EVOLVE]-(c2:Class) where id(m) in [${idList}] return c.changes_count as changes_count`
+    let temp  = 0;
+    let result = await this.neo4jService.run(search)
+      .catch(error => {
+        this.neo4jService.disconnect();
+        console.log(error)
+        throw error;
+      });
+    if(result.length){
+      for(let i =0; i<result.length; i++ ){
+        temp += result[i][0]
+      }
+    }
+    return temp
+  }
+
+
 
   getMetric(type,method){
     let metric=0;
