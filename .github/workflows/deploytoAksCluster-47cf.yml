@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: avibcontainerregistry.azurecr.io
+        username: ${{ secrets.acr_avibcontainerregistry_username }}
+        password: ${{ secrets.acr_avibcontainerregistry_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/." -f  "Dockerfile" -t avibcontainerregistry.azurecr.io/avibcluster47cf:${{ github.sha }}
+        docker push avibcontainerregistry.azurecr.io/avibcluster47cf:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_avibcluster_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep avibcluster47cf | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace avibcluster47cf`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: avibcluster47cf
+        container-registry-url: avibcontainerregistry.azurecr.io
+        container-registry-username: ${{ secrets.acr_avibcontainerregistry_username }}
+        container-registry-password: ${{ secrets.acr_avibcontainerregistry_password }}
+        secret-name: avibclusterdockerauth
+       
+    - uses: azure/k8s-deploy@v1.2
+      with:
+        namespace: avibcluster47cf
+        manifests: |
+          ./manifests/deployment-47cf.yml
+          ./manifests/service-47cf.yml
+        images: |
+          avibcontainerregistry.azurecr.io/avibcluster47cf:${{ github.sha }}
+        imagepullsecrets: |
+          avibclusterdockerauth
