@@ -41,7 +41,7 @@ export class ChainComponent implements OnInit {
   alreadySubscribed=false;
 
   //Neo4j
-  url:string='bolt://20.97.26.116/:7687';
+  url:string='bolt://20.97.26.116:7687';
   username:string= 'neo4j';
   password:string= 'admin';
   encrypted:boolean=false;
