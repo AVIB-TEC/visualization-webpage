@@ -41,7 +41,7 @@ export class ChainComponent implements OnInit {
   alreadySubscribed=false;
 
   //Neo4j
-  url:string='bolt://13.72.82.9:7687';
+  url:string='bolt://20.97.26.116/:7687';
   username:string= 'neo4j';
   password:string= 'admin';
   encrypted:boolean=false;
@@ -288,14 +288,14 @@ export class ChainComponent implements OnInit {
         if(max3<metric3){
           max3 = metric3
         }
-        console.log({
+        /*console.log({
            "name":result[i].method.name,
            "id":result[i].method.id,
            "label":"Method",
            "firstMetric": metric,
            "secondMetric": metric2,
            "thirdMetric": metric3
-          })
+          })*/
         this.data.nodes.push(
           {
            "name":result[i].method.name,
